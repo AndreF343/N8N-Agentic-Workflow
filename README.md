@@ -5,7 +5,7 @@ A self‑hosted **Retrieval‑Augmented‑Generation (RAG)** service that turns 
 ---
 
 ## Table of Contents
-1. [Why this exists](<why-this-exists>)
+1. [Raison D'Etre](<raison-d'etre>)
 2. [Tech stack](<tech-stack>)
 3. [Architecture](#architecture)
 4. [Getting started](<getting-started>)
@@ -17,8 +17,8 @@ A self‑hosted **Retrieval‑Augmented‑Generation (RAG)** service that turns 
 
 ---
 
-## Why this exists
-- **Instant answers:** Team members can query "Which articles cover feature flags?" in seconds instead of searching the site.
+## Raison D'Etre
+- **Instant answers:** Users can query "Which articles cover feature flags?" in seconds instead of searching the site.
 - **Grounded‑only:** Responses always cite the source URL and paragraph.
 - **Incremental:** The nightly crawler adds only new or changed posts—no full re‑index required.
 

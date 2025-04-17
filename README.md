@@ -18,9 +18,9 @@ A self‑hosted **Retrieval‑Augmented‑Generation (RAG)** service that turns 
 ---
 
 ## Why this exists
-- **Instant answers** Team members can query "Which articles cover feature flags?" in seconds instead of searching the site.
-- **Grounded‑only** Responses always cite the source URL and paragraph.
-- **Incremental** The nightly crawler adds only new or changed posts—no full re‑index required.
+- **Instant answers:** Team members can query "Which articles cover feature flags?" in seconds instead of searching the site.
+- **Grounded‑only:** Responses always cite the source URL and paragraph.
+- **Incremental:** The nightly crawler adds only new or changed posts—no full re‑index required.
 
 ---
 

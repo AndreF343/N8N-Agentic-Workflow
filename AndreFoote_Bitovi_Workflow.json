@@ -1,0 +1,966 @@
+{
+  "name": "Bitovi_Articles_Agent_PGV",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "f31a83cd-e027-4771-8757-06721272beea",
+      "name": "Embeddings OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1,
+      "position": [
+        5860,
+        2060
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "YILjgFEYb9tozHe1",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "=id",
+                "value": "={{ $('If_vector_created').item.json.id }}"
+              },
+              {
+                "name": "author",
+                "value": "={{ $('If_vector_created').item.json.author }}"
+              },
+              {
+                "name": "date",
+                "value": "={{ $('If_vector_created').item.json.date }}"
+              },
+              {
+                "name": "article_link",
+                "value": "={{ $('If_vector_created').item.json.article_link}}"
+              },
+              {
+                "name": "title",
+                "value": "={{ $('If_vector_created').item.json.title}}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "ae691955-8853-4a8a-8d33-41055c9abf3c",
+      "name": "Default Data Loader",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1,
+      "position": [
+        6040,
+        2060
+      ]
+    },
+    {
+      "parameters": {
+        "chunkSize": 400,
+        "options": {}
+      },
+      "id": "37feb0f3-84a7-41b8-94f3-a9c9ba85aef5",
+      "name": "Recursive Character Text Splitter",
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        6040,
+        2220
+      ]
+    },
+    {
+      "parameters": {
+        "options": {
+          "batchSize": 512
+        }
+      },
+      "id": "62e73981-02a6-45ae-aa99-f3cb988be571",
+      "name": "Embeddings OpenAI1",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1,
+      "position": [
+        4520,
+        2840
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "YILjgFEYb9tozHe1",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": "documents",
+        "options": {
+          "columnNames": {
+            "values": {
+              "contentColumnName": "content"
+            }
+          }
+        }
+      },
+      "id": "ff7634ea-f75e-4213-ae19-bd9aa7b937d5",
+      "name": "Postgres PGVector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePGVector",
+      "typeVersion": 1,
+      "position": [
+        6060,
+        1820
+      ],
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "maxTries": 5,
+      "credentials": {
+        "postgres": {
+          "id": "DEPuE5tboXLF6RtG",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        3840,
+        2840
+      ],
+      "id": "e52ce379-6271-4dd8-8039-7188cb0ad36f",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "YILjgFEYb9tozHe1",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        4020,
+        2840
+      ],
+      "id": "60adca27-ab88-4128-aa75-fbbce67e00e7",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "DEPuE5tboXLF6RtG",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "df576f9c-764d-4340-b01f-4557fa1dafe7",
+      "name": "Loop Over Pages",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2660,
+        1540
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://www.bitovi.com/blog/page/{{$json[\"page\"]}}",
+        "options": {}
+      },
+      "id": "ab526c53-533a-40e3-9662-4eef6399c7e2",
+      "name": "Bitovi Blog Site",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3020,
+        1400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return Array.from({ length: 40 }, (_, i) => ({ json: { page: i + 1 } }));"
+      },
+      "id": "214e30f0-c827-41ba-865b-50ba2828321d",
+      "name": "Pagination Handler",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2320,
+        1400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "title",
+              "cssSelector": "a.w-full .blog-post-header-image-wrapper p",
+              "returnArray": true
+            },
+            {
+              "key": "date",
+              "cssSelector": "a.w-full time",
+              "returnArray": true
+            },
+            {
+              "key": "author",
+              "cssSelector": ".blog-tile-author-info p.font-bold",
+              "returnArray": true
+            },
+            {
+              "key": "article_link",
+              "cssSelector": ".bitovi-blog-home-tile > a.w-full",
+              "returnValue": "attribute",
+              "attribute": "href",
+              "returnArray": true
+            }
+          ]
+        },
+        "options": {
+          "cleanUpText": false
+        }
+      },
+      "id": "be23184e-a4a0-46f2-a306-2102ef12bcf4",
+      "name": "Extract Article Metadata",
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        3260,
+        1400
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.article_link }}",
+        "options": {}
+      },
+      "id": "afc32c8d-0adb-483f-a78c-4eccafd3d528",
+      "name": "Request Article Content",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        5280,
+        1400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "content",
+              "cssSelector": ".prose",
+              "returnArray": true
+            }
+          ]
+        },
+        "options": {
+          "cleanUpText": true
+        }
+      },
+      "id": "b0b2f599-cb71-47d2-862f-20fd701e6086",
+      "name": "Extract Article Content",
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        5560,
+        1400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE document_metadata\nSET vector_created = TRUE\nWHERE vector_created = FALSE;",
+        "options": {}
+      },
+      "id": "0bc5c266-9979-420a-a897-8d43f5777eca",
+      "name": "Update vector_created",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        2320,
+        1680
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "DEPuE5tboXLF6RtG",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "d682b13c-2a40-42c8-9f34-608a4e2b66ca",
+      "name": "Test",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        2000,
+        1520
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "36a18ae0-2862-4225-90b1-a6c23324d707",
+      "name": "Chat",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        3960,
+        2520
+      ],
+      "webhookId": "24f7665f-bed1-402c-9f4e-29376829a6b7"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO document_metadata (title, date, author, article_link, vector_created)\nVALUES ($1, $2, $3, $4, 'false')\nON CONFLICT (article_link) DO NOTHING;\n",
+        "options": {
+          "queryReplacement": "{{$json[\"title\"]}}, {{$json[\"date\"]}}, {{$json[\"author\"]}}, {{$json[\"article_link\"]}}"
+        }
+      },
+      "id": "9f925f3b-3f2c-458c-ab9a-7c84e0ae3e06",
+      "name": "Insert Metadata",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        4000,
+        1400
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "DEPuE5tboXLF6RtG",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, title, date, author, article_link FROM document_metadata WHERE vector_created IS false;\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        4260,
+        1400
+      ],
+      "id": "f0d26715-66b2-4b47-a4f0-c41194817129",
+      "name": "Get Metadata",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "DEPuE5tboXLF6RtG",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## RAG AI Agent with PGVector Tool\n",
+        "height": 700,
+        "width": 1240
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3640,
+        2440
+      ],
+      "typeVersion": 1,
+      "id": "3d8c7cc2-0a06-4111-8392-8d9b693d33ae",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Insert Into PGVector Store",
+        "height": 700,
+        "width": 840,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        5660,
+        1700
+      ],
+      "typeVersion": 1,
+      "id": "540753c4-b200-4ad0-a1d5-dcb184cfe0dd",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Data Ingestion Workflow",
+        "height": 1280,
+        "width": 4320,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2180,
+        1120
+      ],
+      "typeVersion": 1,
+      "id": "7c052c0a-827c-4984-a3ae-b8736f10fad4",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Use this tool to fetch all available documents.",
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "document_metadata",
+          "mode": "list",
+          "cachedResultName": "document_metadata"
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.5,
+      "position": [
+        4180,
+        2840
+      ],
+      "id": "a1646181-a859-4e84-a65b-c0190ccff7e3",
+      "name": "List Documents",
+      "credentials": {
+        "postgres": {
+          "id": "DEPuE5tboXLF6RtG",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Given a metadata id, fetches the content of the document",
+        "operation": "executeQuery",
+        "query": "SELECT\n    string_agg(content, ' ') as document_content\nFROM documents\n    WHERE (metadata::jsonb)->>'id' = $1\nGROUP BY (metadata::jsonb)->>'id';",
+        "options": {
+          "queryReplacement": "{{ $fromAI('id') }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.5,
+      "position": [
+        4340,
+        2840
+      ],
+      "id": "1230b84d-a5ed-4638-9e07-28cbaef7eb02",
+      "name": "Get Article Contents",
+      "credentials": {
+        "postgres": {
+          "id": "DEPuE5tboXLF6RtG",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "documents",
+        "toolDescription": "Use RAG to look up information in the knowledge base.",
+        "tableName": "documents",
+        "options": {}
+      },
+      "id": "99715c47-f9f1-41d6-93ef-f711e4f0bc83",
+      "name": "PGVector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePGVector",
+      "typeVersion": 1,
+      "position": [
+        4500,
+        2700
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "DEPuE5tboXLF6RtG",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=You are a helpful assistant. You answer questions from a corpus of documents when you don't know the answer yourself. These documents are either text based (extracted text, code, links from articles published on Bitovi's blog website) or tabular (relational row data).\n\nYou are given the tools to perform RAG in the 'documents' table, look up the documents available in 'document_metadata' table, extract text from a given document.\n\nAlways start by performing RAG unless the user asks you to check a document or the question requires an SQL query for a tabular data, something like finding the most recent or oldest articles in the dataset, or just generally things that RAG lookup would be unreliable for. If RAG doesn't help, then look at the documents that are available to you, find a few that you think would contain the answer, and then analyze those.\n\nYou always tell the user when you don't know something instead of giving them an answer just to please them. You provide links to Bitovi articles whenever you can.\n\nToday's date is {{  DateTime.now()  }}\n\nYour Tools are: List Documents, Get Article Contents, PGVector Store"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        4140,
+        2520
+      ],
+      "id": "dcb33b4c-3c84-4815-bc96-f2cd7f589156",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "title, author, date, article_link",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        3500,
+        1400
+      ],
+      "id": "95ac32d8-15c1-4ea6-9be2-2380d74e71cd",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Bug in If Nodes being used after SQL Queries...! https://community.n8n.io/t/when-using-if-in-flow-it-gives-wrong-results-every-time/51204/3\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4540,
+        1400
+      ],
+      "id": "11107c5c-2804-4426-9e18-af12c9e9eb7d",
+      "name": "MANDATORY CODE NODE"
+    },
+    {
+      "parameters": {
+        "content": "## Get/Insert New Article Metadata",
+        "height": 620,
+        "width": 1960,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2980,
+        1120
+      ],
+      "typeVersion": 1,
+      "id": "3f6eb4da-5774-45fe-bc88-6f0a05beb367",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "9fc66f9a-d7d9-44c5-bf26-45e154eb6271",
+              "leftValue": "={{ Object.keys($json).length > 0 }}\n",
+              "rightValue": 0,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4880,
+        1540
+      ],
+      "id": "71150a47-1e30-48d8-b5cb-79667bde9cd7",
+      "name": "If_vector_created",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e557c1fb-e8a5-41e1-bb46-1a87b94d3558",
+              "name": "date",
+              "value": "={{  new Date($json[\"date\"]).toISOString().split(\"T\")[0] }}\n",
+              "type": "string"
+            },
+            {
+              "id": "8bdf6e33-a360-4413-8424-fdc2158244ec",
+              "name": "title",
+              "value": "={{ $json[\"title\"].replace(/,/g, \"\") }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3740,
+        1400
+      ],
+      "id": "c03a57dc-a4fc-4de9-ad39-5729baf5fb4d",
+      "name": "Cleaning"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        2000,
+        1300
+      ],
+      "id": "49098800-b3bc-469c-8ce9-3810515dbd00",
+      "name": "Nightly Trigger"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Insert Metadata": {
+      "main": [
+        [
+          {
+            "node": "Get Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Postgres PGVector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Postgres PGVector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "PGVector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres PGVector Store": {
+      "main": [
+        [
+          {
+            "node": "Update vector_created",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Pages": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Bitovi Blog Site",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bitovi Blog Site": {
+      "main": [
+        [
+          {
+            "node": "Extract Article Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pagination Handler": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Pages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Article Metadata": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Request Article Content": {
+      "main": [
+        [
+          {
+            "node": "Extract Article Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Article Content": {
+      "main": [
+        [
+          {
+            "node": "Postgres PGVector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update vector_created": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Pages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Test": {
+      "main": [
+        [
+          {
+            "node": "Pagination Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Metadata": {
+      "main": [
+        [
+          {
+            "node": "MANDATORY CODE NODE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List Documents": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Article Contents": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PGVector Store": {
+      "ai_vectorStore": [
+        []
+      ],
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Cleaning",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MANDATORY CODE NODE": {
+      "main": [
+        [
+          {
+            "node": "If_vector_created",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If_vector_created": {
+      "main": [
+        [
+          {
+            "node": "Request Article Content",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Postgres PGVector Store",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Pages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cleaning": {
+      "main": [
+        [
+          {
+            "node": "Insert Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nightly Trigger": {
+      "main": [
+        [
+          {
+            "node": "Pagination Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f2adf955-d9d7-4e83-93c6-bb922497a9e8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b32916e8186656ae004d983688e1ad532bb31dac98f2af9254af43a63b95cfec"
+  },
+  "id": "2sBXJhaw6UsoUXfr",
+  "tags": []
+}
